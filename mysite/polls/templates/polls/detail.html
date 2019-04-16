@@ -9,19 +9,24 @@
 <body>
     <h1>{{ poll.title }}</h1>
     <h3>Question list</h3>
-
-    <ul>
-    {% for question in poll.question_set.all %}
-        <li>
-            {{ question.text }}
-            <ul>
-                {% for choice in question.choice_set.all %}
-                <li>{{ choice.text }}</li>
-                {% endfor %}
-            </ul>
-        </li>
-    {% endfor %}
-    </ul>
-    
+    <form method="post" action="{% url 'poll_detail' poll.id %}">
+        {% csrf_token %}
+        <div style="text-align:center;">
+            <input type="submit" value="SAVE">
+            <a href="{% url 'index' %}"><input type="button" value="CANCEL"></a>
+        </div>
+        <ul>
+        {% for question in poll.question_set.all %}
+            <li>
+                {{ question.text }}
+                <ul>
+                    {% for choice in question.choice_set.all %}
+                    <input type="radio" name="choice{{ question.id }}" value="{{ choice.id }}" {% if choice.answer %}checked="checked"{% endif %}>{{ choice.text }} - {{ choice.answer }}<br>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+        </ul>
+    </form>
 </body>
 </html>
