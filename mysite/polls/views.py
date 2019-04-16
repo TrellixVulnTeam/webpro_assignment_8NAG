@@ -3,6 +3,8 @@ from django.db.models import Count
 from django.http import HttpResponse
 from polls.models import Poll, Question, Answer
 
+from .forms import PollForm
+
 def index(request):
 	#poll_list = Poll.objects.all()
 	poll_list = Poll.objects.annotate(question_count=Count('question'))
@@ -39,7 +41,19 @@ def detail(request, poll_id):
 
 	return render(request, 'polls/detail.html', { 'poll': poll })
  
-# def create(request):
-# 	 if request.method == 'POST':
-# 		 title = request.POST.get('title')
-# 		 question_list = request.POST.getlist('questions[]')
+def create(request):
+	if request.method == 'POST':
+		# title = request.POST.get('title')
+		# question_list = request.POST.getlist('questions[]')
+		form = PollForm(request.POST)
+
+		if form.is_valid():
+			form.save()
+
+	else:
+		# answers = request.GET.get('answers')
+		# answer_list = request.GET.getlist('answers[]')
+		form = PollForm() 
+	
+	context = {'form':form}
+	return render(request, 'polls/create.html', context=context)
