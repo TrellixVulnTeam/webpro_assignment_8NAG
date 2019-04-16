@@ -1,0 +1,19 @@
+<html lang="en">
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My Poll Page</title>
+</head>
+<body>
+    <h1>{{ page_title }}</h1>
+    <!--<img src="{% static 'polls/images/logo.png' %}">-->
+    <h2>Popular polls</h2>
+    <ul>
+        {% for poll in poll_list %}
+        <li>{{ poll.id }} {{ poll.title }}  ({{ poll.question_count }} คำถาม) <a href="{% url 'poll_detail' poll.id %}">detail</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Poll Detail</title>
+</head>
+<body>
+    <h1>{{ poll.title }}</h1>
+    <h3>Question list</h3>
+
+    <ul>
+    {% for question in poll.question_set.all %}
+        <li>
+            {{ question.text }}
+            <ul>
+                {% for choice in question.choice_set.all %}
+                <li>{{ choice.text }}</li>
+                {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+    </ul>
+    
+</body>
+</html>
