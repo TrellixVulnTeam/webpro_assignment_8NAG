@@ -48,8 +48,18 @@ def create(request):
 		form = PollForm(request.POST)
 
 		if form.is_valid():
-			form.save()
+			poll = Poll.objects.create(
+				title=form.cleaned_data.get('title'),
+				start_date=form.cleaned_data.get('start_date'),
+				end_date=form.cleaned_data.get('end_date')			
+			)
 
+			for i in range(1, form.cleaned_data.get('no_question') + 1):
+				Question.objects.create(
+					text='QQQ' + str(i),
+					type='01',
+					poll=poll
+				)
 	else:
 		# answers = request.GET.get('answers')
 		# answer_list = request.GET.getlist('answers[]')
