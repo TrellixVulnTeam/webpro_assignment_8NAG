@@ -1,9 +1,44 @@
-from django.shortcuts import render
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required, permission_required
+from django.shortcuts import render, redirect
+from django.db import connection
 from django.db.models import Count
-from django.http import HttpResponse
-from polls.models import Poll, Question, Answer
+from django.http import HttpResponse, HttpResponseRedirect
+from polls.models import Poll, Question, Answer, Comment
+from .forms import PollForm, CommentForm, ChangePasswordForm, NewUserForm
 
-from .forms import PollForm
+
+def my_login(request):
+	context = {}
+
+	if request.method == 'POST':
+		username = request.POST.get('username')
+		password = request.POST.get('password')
+
+		user = authenticate(request, username=username, password=password)
+
+		if user:
+			login(request, user)
+
+			next_url = request.POST.get('next_url')
+			if next_url:
+				return redirect(next_url)
+			else:
+				return redirect('index')
+		else:
+			context['username'] = username
+			context['password'] = password
+			context['error'] = 'Wrong username or password!'
+
+	next_url = request.GET.get('next')
+	if next_url:
+		context['next_url'] = next_url
+	return render(request, 'polls/login.html', context=context)
+
+def my_logout(request):
+	logout(request)
+	return redirect('login')
 
 def index(request):
 	#poll_list = Poll.objects.all()
@@ -17,9 +52,12 @@ def index(request):
 		'page_title': "My Polls", 
 		'poll_list': poll_list
 	}
-	
+	#print(request.user)
+	#print(request.user.email)
 	return render(request, 'polls/index.html', context=context)
-  
+
+@login_required
+@permission_required('polls.view_poll')
 def detail(request, poll_id):
 
 	poll = Poll.objects.get(pk=poll_id)
@@ -40,7 +78,9 @@ def detail(request, poll_id):
 	print(request.GET)
 
 	return render(request, 'polls/detail.html', { 'poll': poll })
- 
+
+@login_required
+@permission_required('polls.add_poll')
 def create(request):
 	if request.method == 'POST':
 		# title = request.POST.get('title')
@@ -67,3 +107,60 @@ def create(request):
 	
 	context = {'form':form}
 	return render(request, 'polls/create.html', context=context)
+
+@login_required
+def create_comments(request, poll_id):
+	if request.method == 'POST':
+		form = CommentForm(request.POST)
+		poll = Poll.objects.get(pk=poll_id)
+		if form.is_valid():
+			Comment.objects.create(
+				poll=poll,
+				title=form.cleaned_data.get('title'),
+				body=form.cleaned_data.get('body'),
+				email=form.cleaned_data.get('email'),
+				tel=form.cleaned_data.get('tel')
+			)
+	else:
+		form = CommentForm()
+	
+	context = {
+		'form': form,
+		'poll_id': poll_id
+	}
+
+	return render(request, 'polls/create-comment.html', context=context)
+
+@login_required
+def change_password(request):
+	if request.method == 'POST':
+		form = ChangePasswordForm(request.POST, user=request.user)
+		if form.is_valid():
+			u = request.user
+			u.set_password(form.cleaned_data.get('new_pw'))
+			u.save()
+	else:
+		form = ChangePasswordForm(user=request.user)
+
+	context = {
+		'form': form
+	}
+
+	return render(request, 'polls/change_password.html', context=context)
+
+def newuser(request):
+
+	if request.method == 'POST':
+		form = NewUserForm(request.POST)
+		if form.is_valid():
+			Profile.objects.create(
+				user=form.cleaned_data.get('user')
+			)
+	else:
+		form = NewUserForm()
+	
+	context = {
+		'form': form
+	}
+	
+	return render(request, 'polls/register.html', context=context)

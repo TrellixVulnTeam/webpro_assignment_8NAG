@@ -11,6 +11,16 @@ class Poll(models.Model):
     def __str__(self):
         return self.title
 
+class Comment(models.Model):
+    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, null=True, blank=True)
+
+    title = models.CharField(max_length=100)
+    body = models.TextField()
+    email = models.EmailField()
+    tel = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.title
 
 class Question(models.Model):
     text = models.TextField()
@@ -40,3 +50,20 @@ class Answer(models.Model):
     choice = models.OneToOneField(Choice, on_delete=models.PROTECT)
     question = models.ForeignKey(Question, on_delete=models.PROTECT)
 
+class Profile(models.Model):
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
+
+    line_id = models.CharField(max_length=100)
+    facebook = models.CharField(max_length=100)
+
+    MALE = 'M'
+    FEMALE = 'F'
+    OTHER = 'X'
+    GENDERS = (
+        (MALE, 'ชาย'),
+        (FEMALE, 'หญิง'),
+        (OTHER, 'อื่นๆ')
+    )
+    gender = models.CharField(max_length=1, choices=GENDERS)
+
+    birthdate = models.DateField()
