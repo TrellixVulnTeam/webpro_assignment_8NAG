@@ -10,5 +10,9 @@ urlpatterns = [
     path('detail/<int:poll_id>/', views.detail, name='poll_detail'),
     path('create/', views.create, name='create_poll'),
     path('detail/<int:poll_id>/create-comments/', views.create_comments, name='create_comments'),
-    path('new-user/', views.newuser, name='newuser')
+    path('new-user/', views.newuser, name='newuser'),
+    path('update/<int:poll_id>/', views.update, name='update_poll'),
+    path('delete/<int:question_id>/', views.delete_question, name='delete_question'),
+    path('<int:question_id>/add-choice/', views.add_choice, name='add_choice'),
+    path('api/<int:question_id>/add-choice/', views.add_choice_api, name='add_choice_api'),
 ]
